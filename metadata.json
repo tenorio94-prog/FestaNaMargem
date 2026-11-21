@@ -1,0 +1,8 @@
+{
+  "name": "FestaNaMargem",
+  "description": "Transforme pedidos de orçamento de buffet no WhatsApp em propostas em PDF com margem travada e gere com 1 toque a lista de compras consolidada do fim de semana.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
