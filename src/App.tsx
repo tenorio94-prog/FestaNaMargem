@@ -26,8 +26,15 @@ import { ShoppingListView } from './components/ShoppingListView';
 import { TemplatesView } from './components/TemplatesView';
 import { ProposalPreviewModal } from './components/ProposalPreviewModal';
 import { BuffetSettingsModal } from './components/BuffetSettingsModal';
+import { LandingPage } from './components/LandingPage';
 
 type AppTab = 'orcamentos' | 'cotar' | 'compras' | 'templates';
+
+function shouldAutostartApp(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get('autostart') === '1';
+}
 
 export default function App() {
   const [quotes, setQuotes] = useState<Quote[]>(() => loadQuotes());
@@ -37,6 +44,7 @@ export default function App() {
     loadCheckedShoppingKeys()
   );
 
+  const [showLanding, setShowLanding] = useState<boolean>(() => !shouldAutostartApp());
   const [activeTab, setActiveTab] = useState<AppTab>('orcamentos');
   const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [editingIsNew, setEditingIsNew] = useState(false);
@@ -68,6 +76,7 @@ export default function App() {
     setEditingQuote(fresh);
     setEditingIsNew(true);
     setActiveTab('cotar');
+    setShowLanding(false);
   };
 
   const handleOpenEditQuote = (quoteId: string) => {
@@ -210,6 +219,19 @@ export default function App() {
     [proposalQuote, profile.minMarginFloorPct]
   );
 
+  if (showLanding) {
+    return (
+      <LandingPage
+        templates={templates}
+        onEnterApp={() => {
+          setShowLanding(false);
+          setActiveTab('orcamentos');
+        }}
+        onStartWithTemplate={(templateId) => handleStartNewQuote(templateId)}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F7F7F5] text-neutral-900 flex flex-col lg:flex-row">
       {/* Desktop Left Workspace Sidebar */}
@@ -217,8 +239,9 @@ export default function App() {
         <div className="h-16 px-5 flex items-center border-b border-neutral-200">
           <button
             type="button"
-            onClick={() => setActiveTab('orcamentos')}
-            className="text-lg font-extrabold tracking-tight text-neutral-900 whitespace-nowrap shrink-0"
+            onClick={() => setShowLanding(true)}
+            title="Voltar para a página inicial"
+            className="text-lg font-extrabold tracking-tight text-neutral-900 hover:text-emerald-800 transition-colors whitespace-nowrap shrink-0"
           >
             FestaNaMargem
           </button>
@@ -268,9 +291,13 @@ export default function App() {
         {/* Top Bar Contract: compact 52px on mobile, 64px on desktop */}
         <header className="sticky top-0 z-20 h-[52px] lg:h-16 bg-white/95 backdrop-blur-sm border-b border-neutral-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="lg:hidden text-base font-extrabold tracking-tight text-neutral-900 whitespace-nowrap shrink-0">
+            <button
+              type="button"
+              onClick={() => setShowLanding(true)}
+              className="lg:hidden text-base font-extrabold tracking-tight text-neutral-900 whitespace-nowrap shrink-0"
+            >
               FestaNaMargem
-            </span>
+            </button>
             <h1 className="hidden lg:block text-base font-bold text-neutral-900 truncate">
               {pageHeading[activeTab]}
             </h1>
